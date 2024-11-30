@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Social Post Date Extractor</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <h2>Social Post Date Extractor</h2>
+    
+    <div class="input-section">
+      <input type="text" id="url" placeholder="Paste TikTok or LinkedIn URL">
+      <button id="getDateBtn" disabled>Get Date</button>
+      <button id="clearBtn">Clear</button>
+    </div>
+
+    <div id="urlValidation" class="error hidden">
+      Please enter a valid URL
+    </div>
+
+    <div id="loader" class="loader hidden"></div>
+
+    <div id="result" class="result hidden">
+      <p>Post Date: <span id="date"></span></p>
+      <button id="copyBtn">Copy Date</button>
+    </div>
+
+    <div id="auto-detect" class="hidden">
+      <p>Detected Post Date: <span id="detected-date"></span></p>
+      <button id="copy-detected">Copy Date</button>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
