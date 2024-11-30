@@ -31,9 +31,9 @@ Extracted Date: Mon, 13 Nov 2023 15:30:45 GMT (UTC)
 
 ## Installation
 
-1. Clone this repository
+1. Clone this repository or download the ZIP file
 2. Open Chrome and go to `chrome://extensions/`
-3. Enable "Developer mode"
+3. Enable "Developer mode" in the top right corner
 4. Click "Load unpacked" and select the extension folder
 
 ## Privacy
