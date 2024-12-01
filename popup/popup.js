@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const result = document.querySelector("#result");
 
   function validateUrl(url) {
-    const tiktokRegex = /^https:\/\/(www\.)?tiktok\.com\/@[\w.]+\/video\/\d+/;
+    const tiktokRegex = /^https:\/\/(www\.)?tiktok\.com\/@[\w.]+\/(video|photo)\/\d+/;
     // LinkedIn regex updated to match 19-digit IDs
     const linkedinRegex = /linkedin\.com.*[^0-9]([0-9]{19})/;
     return tiktokRegex.test(url) || linkedinRegex.test(url);
@@ -134,9 +134,9 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function getVidId(url) {
-    const regex = /\/video\/(\d+)/;
+    const regex = /\/(video|photo)\/(\d+)/;
     const match = regex.exec(url);
-    return match ? match[1] : null;
+    return match ? match[2] : null;
   }
 
   function unixTimestampToHumanDate(timestamp) {
