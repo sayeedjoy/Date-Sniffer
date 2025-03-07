@@ -7,6 +7,41 @@ document.addEventListener('DOMContentLoaded', function() {
   const loader = document.querySelector("#loader");
   const urlValidation = document.querySelector("#urlValidation");
   const result = document.querySelector("#result");
+  const themeToggle = document.querySelector("#themeToggle");
+
+  // Theme management
+  function setTheme(isDark) {
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    themeToggle.querySelector('.material-icons').textContent = isDark ? 'light_mode' : 'dark_mode';
+    chrome.storage.local.set({ isDarkMode: isDark }, () => {
+      if (chrome.runtime.lastError) {
+        console.error('Error saving theme:', chrome.runtime.lastError);
+      }
+    });
+  }
+
+  // Initialize theme
+  function initializeTheme() {
+    chrome.storage.local.get('isDarkMode', function(data) {
+      if (chrome.runtime.lastError) {
+        console.error('Error loading theme:', chrome.runtime.lastError);
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        setTheme(prefersDark);
+        return;
+      }
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const isDark = data.isDarkMode !== undefined ? data.isDarkMode : prefersDark;
+      setTheme(isDark);
+    });
+  }
+
+  initializeTheme();
+
+  // Theme toggle event listener
+  themeToggle.addEventListener('click', () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    setTheme(currentTheme !== 'dark');
+  });
 
   function validateUrl(url) {
     const tiktokRegex = /^https:\/\/(www\.)?tiktok\.com\/@[\w.]+\/(video|photo)\/\d+/;
@@ -58,10 +93,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function extractTikTokTimestamp(videoId) {
     try {
-      const binary = BigInt(videoId).toString(2);
-      const first31Bits = binary.slice(0, 31);
-      const timestamp = parseInt(first31Bits, 2);
-      return timestamp;
+      const milliseconds = BigInt(videoId) >> 32n;
+      return Number(milliseconds);
     } catch (error) {
       console.error('Error extracting TikTok timestamp:', error);
       return null;
