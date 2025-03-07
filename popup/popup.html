@@ -2,17 +2,28 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Date Sniffer - Social Post Date Extractor</title>
   <link rel="stylesheet" href="popup.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 </head>
 <body>
   <div class="container" role="main">
+    <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode">
+      <span class="material-icons">dark_mode</span>
+    </button>
+    
     <h2>Date Sniffer</h2>
     
     <div class="input-section">
       <input type="text" id="url" placeholder="Paste TikTok or LinkedIn URL" aria-label="URL input field">
-      <button id="getDateBtn" disabled aria-label="Extract date from URL">Extract Date</button>
-      <button id="clearBtn" aria-label="Clear input field">Clear</button>
+      <button id="getDateBtn" disabled aria-label="Extract date from URL">
+        <span class="material-icons">schedule</span>
+        Extract
+      </button>
+      <button id="clearBtn" aria-label="Clear input field">
+        <span class="material-icons">clear</span>
+      </button>
     </div>
 
     <div id="urlValidation" class="error hidden" role="alert" aria-live="polite">
@@ -26,6 +37,7 @@
     <div id="result" class="result hidden" role="status" aria-live="polite">
       <p>Post Date: <span id="date"></span></p>
       <button id="copyBtn" aria-label="Copy date to clipboard">
+        <span class="material-icons">content_copy</span>
         <span>Copy Date</span>
       </button>
     </div>
@@ -33,6 +45,7 @@
     <div id="auto-detect" class="hidden" role="status" aria-live="polite">
       <p>Detected Post Date: <span id="detected-date"></span></p>
       <button id="copy-detected" aria-label="Copy detected date to clipboard">
+        <span class="material-icons">content_copy</span>
         <span>Copy Date</span>
       </button>
     </div>
