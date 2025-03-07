@@ -1,68 +1,131 @@
 body {
-    width: 400px;
-    padding: 20px;
-    font-family: Arial, sans-serif;
-  }
-  
-  .container {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-  }
-  
-  .input-section {
-    display: flex;
-    gap: 10px;
-  }
-  
-  input {
-    flex: 1;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
-  
-  button {
-    padding: 8px 16px;
-    background-color: #0066cc;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  button:disabled {
-    background-color: #cccccc;
-    cursor: not-allowed;
-  }
-  
-  .error {
-    color: red;
-    font-size: 14px;
-  }
-  
-  .hidden {
-    display: none;
-  }
-  
-  .loader {
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #0066cc;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    animation: spin 1s linear infinite;
-    margin: 10px auto;
-  }
-  
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-  
-  .result {
-    margin-top: 10px;
-    padding: 10px;
-    background-color: #f5f5f5;
-    border-radius: 4px;
-  }
+  width: 400px;
+  padding: 24px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  margin: 0;
+  background-color: #ffffff;
+  color: #1a1a1a;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+h2 {
+  margin: 0 0 16px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.input-section {
+  display: flex;
+  gap: 8px;
+}
+
+input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+  outline: none;
+}
+
+input:focus {
+  border-color: #0066cc;
+  box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
+}
+
+input::placeholder {
+  color: #757575;
+}
+
+button {
+  padding: 10px 16px;
+  background-color: #0066cc;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+button:hover {
+  background-color: #0052a3;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+button:disabled {
+  background-color: #e0e0e0;
+  color: #757575;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.error {
+  color: #d32f2f;
+  font-size: 13px;
+  padding: 8px 12px;
+  background-color: #ffebee;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+}
+
+.hidden {
+  display: none;
+}
+
+.loader {
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #0066cc;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  animation: spin 0.8s linear infinite;
+  margin: 16px auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.result, #auto-detect {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 8px;
+}
+
+.result p, #auto-detect p {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: #424242;
+}
+
+#date, #detected-date {
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+#copyBtn, #copy-detected {
+  background-color: #f8f9fa;
+  color: #0066cc;
+  border: 1px solid #0066cc;
+  padding: 8px 14px;
+  font-size: 13px;
+}
+
+#copyBtn:hover, #copy-detected:hover {
+  background-color: #f0f7ff;
+}

@@ -1,33 +1,40 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Social Post Date Extractor</title>
+  <meta charset="UTF-8">
+  <title>Date Sniffer - Social Post Date Extractor</title>
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-  <div class="container">
-    <h2>Social Post Date Extractor</h2>
+  <div class="container" role="main">
+    <h2>Date Sniffer</h2>
     
     <div class="input-section">
-      <input type="text" id="url" placeholder="Paste TikTok or LinkedIn URL">
-      <button id="getDateBtn" disabled>Get Date</button>
-      <button id="clearBtn">Clear</button>
+      <input type="text" id="url" placeholder="Paste TikTok or LinkedIn URL" aria-label="URL input field">
+      <button id="getDateBtn" disabled aria-label="Extract date from URL">Extract Date</button>
+      <button id="clearBtn" aria-label="Clear input field">Clear</button>
     </div>
 
-    <div id="urlValidation" class="error hidden">
-      Please enter a valid URL
+    <div id="urlValidation" class="error hidden" role="alert" aria-live="polite">
+      Please enter a valid TikTok or LinkedIn URL
     </div>
 
-    <div id="loader" class="loader hidden"></div>
+    <div id="loader" class="loader hidden" role="status" aria-label="Loading">
+      <span class="sr-only">Loading...</span>
+    </div>
 
-    <div id="result" class="result hidden">
+    <div id="result" class="result hidden" role="status" aria-live="polite">
       <p>Post Date: <span id="date"></span></p>
-      <button id="copyBtn">Copy Date</button>
+      <button id="copyBtn" aria-label="Copy date to clipboard">
+        <span>Copy Date</span>
+      </button>
     </div>
 
-    <div id="auto-detect" class="hidden">
+    <div id="auto-detect" class="hidden" role="status" aria-live="polite">
       <p>Detected Post Date: <span id="detected-date"></span></p>
-      <button id="copy-detected">Copy Date</button>
+      <button id="copy-detected" aria-label="Copy detected date to clipboard">
+        <span>Copy Date</span>
+      </button>
     </div>
   </div>
   <script src="popup.js"></script>
