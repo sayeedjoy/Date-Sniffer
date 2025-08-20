@@ -2,8 +2,9 @@
 function extractTikTokTimestamp(videoId) {
   try {
       // Convert to milliseconds for correct date
-      const milliseconds = BigInt(videoId) >> 32n;
-      return Number(milliseconds);
+      const seconds = BigInt(videoId) >> 32n;
+      // TikTok ID encodes seconds; convert to milliseconds for Date()
+      return Number(seconds) * 1000;
   } catch (error) {
       console.error('Error extracting TikTok timestamp:', error);
       return null;
@@ -53,9 +54,10 @@ function extractLinkedInCommentId(url) {
 function extractLinkedInTimestamp(id) {
   if (!id) return null;
   try {
-      const binary = BigInt(id).toString(2);
-      const first41Bits = binary.slice(0, 41);
-      return parseInt(first41Bits, 2);
+      // LinkedIn snowflake: 41-bit millisecond timestamp in high bits
+      // Shift right by 23 to drop sequence & worker bits
+      const ms = BigInt(id) >> 23n;
+      return Number(ms);
   } catch (error) {
       console.error('Error extracting LinkedIn timestamp:', error);
       return null;

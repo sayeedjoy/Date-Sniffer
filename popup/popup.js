@@ -8,6 +8,9 @@ document.addEventListener('DOMContentLoaded', function() {
   const urlValidation = document.querySelector("#urlValidation");
   const result = document.querySelector("#result");
   const themeToggle = document.querySelector("#themeToggle");
+  const autoDetect = document.querySelector("#auto-detect");
+  const detectedDateEl = document.querySelector("#detected-date");
+  const copyDetectedBtn = document.querySelector("#copy-detected");
 
   // Theme management
   function setTheme(isDark) {
@@ -63,6 +66,7 @@ document.addEventListener('DOMContentLoaded', function() {
   getDateBtn.addEventListener('click', getDate);
   clearBtn.addEventListener('click', clearFields);
   copyBtn.addEventListener('click', copyDate);
+  copyDetectedBtn.addEventListener('click', copyDetectedDate);
 
   function getLinkedInPostId(url) {
     const regex = /([0-9]{19})/;
@@ -183,6 +187,12 @@ document.addEventListener('DOMContentLoaded', function() {
     result.classList.remove('hidden');
   }
 
+  function showDetected(date) {
+    if (!date) return;
+    detectedDateEl.textContent = date;
+    autoDetect.classList.remove('hidden');
+  }
+
   function showError(message) {
     loader.classList.add('hidden');
     urlValidation.textContent = message;
@@ -205,4 +215,42 @@ document.addEventListener('DOMContentLoaded', function() {
       }, 2000);
     });
   }
+
+  function copyDetectedDate() {
+    navigator.clipboard.writeText(detectedDateEl.textContent).then(() => {
+      const originalText = copyDetectedBtn.querySelector('span:last-child').textContent;
+      copyDetectedBtn.querySelector('span:last-child').textContent = 'Copied!';
+      setTimeout(() => {
+        copyDetectedBtn.querySelector('span:last-child').textContent = originalText;
+      }, 2000);
+    });
+  }
+
+  // Listen for automatic detection messages while popup is open
+  chrome.runtime.onMessage.addListener((message) => {
+    if (message && message.type === 'DATE_DETECTED' && message.date) {
+      showDetected(message.date);
+    }
+  });
+
+  // On popup open, try to auto-detect from the active tab
+  function detectFromActiveTab() {
+    try {
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (chrome.runtime.lastError) return;
+        const activeTab = tabs && tabs[0];
+        if (!activeTab || !activeTab.id) return;
+        chrome.tabs.sendMessage(activeTab.id, { action: 'extractDate' }, (response) => {
+          if (chrome.runtime.lastError) return; // content script may not be injected on this page
+          if (response && response.date) {
+            showDetected(response.date);
+          }
+        });
+      });
+    } catch (_) {
+      // noop
+    }
+  }
+
+  detectFromActiveTab();
 });

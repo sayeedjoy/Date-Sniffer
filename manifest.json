@@ -7,14 +7,18 @@
       "activeTab",
       "scripting",
       "storage",
-      "clipboardWrite"
+      "clipboardWrite",
+      "tabs"
     ],
+    "background": {
+      "service_worker": "background.js"
+    },
     "host_permissions": [
       "https://*.tiktok.com/*",
       "https://*.linkedin.com/*"
     ],
     "action": {
-      "default_popup": "popup/popup.html",
+      "default_popup": "popup/index.html",
       "default_icon": {
         "16": "icons/icon16.png",
         "48": "icons/icon48.png",
@@ -34,5 +38,8 @@
       "16": "icons/icon16.png",
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
+    },
+    "content_security_policy": {
+      "extension_pages": "script-src 'self'; object-src 'self'; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src https://fonts.gstatic.com;"
     }
   }

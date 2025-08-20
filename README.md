@@ -9,12 +9,14 @@ A Chrome extension to extract post dates from TikTok videos and LinkedIn posts w
 - Copy dates to clipboard
 - Shows dates in UTC format
 - Works with LinkedIn comments as well
+- Automatic detection now shows directly in the popup when available
+- Dark mode toggle with preference saved
 
 ## How it Works
 
 The extension extracts timestamps embedded in the IDs of TikTok videos and LinkedIn posts:
 
-- **TikTok**: Extracts the first 31 bits from the video ID and converts it to a Unix timestamp
+- **TikTok**: Extracts seconds from the high bits of the video ID and converts to milliseconds for accurate dates
 - **LinkedIn**: Uses the first 41 bits from post/comment IDs to get the creation timestamp
 - These timestamps are then converted to human-readable UTC dates
 
@@ -32,9 +34,12 @@ Extracted Date: Mon, 13 Nov 2023 15:30:45 GMT (UTC)
 ## Installation
 
 1. Clone this repository or download the ZIP file
-2. Open Chrome and go to `chrome://extensions/`
-3. Enable "Developer mode" in the top right corner
-4. Click "Load unpacked" and select the extension folder
+2. Install dependencies and build the extension popup with Next.js
+   - `npm install`
+   - `npm run build:extension`
+3. Open Chrome and go to `chrome://extensions/`
+4. Enable "Developer mode" in the top right corner
+5. Click "Load unpacked" and select the `dist` folder
 
 ## Privacy
 
