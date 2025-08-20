@@ -3,8 +3,8 @@ import { useEffect, useState } from 'react';
 
 export default function PopupPage() {
   const [url, setUrl] = useState('');
-  const [date, setDate] = useState<string | null>(null);
-  const [detected, setDetected] = useState<string | null>(null);
+  const [dateMs, setDateMs] = useState<number | null>(null);
+  const [detectedMs, setDetectedMs] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isDark, setIsDark] = useState(false);
@@ -28,7 +28,10 @@ export default function PopupPage() {
 
     const onMsg = (message: any) => {
       if (message?.type === 'DATE_DETECTED' && message.date) {
-        setDetected(message.date);
+        try {
+          const ms = new Date(String(message.date).replace(' (UTC)', '')).getTime();
+          if (!Number.isNaN(ms)) setDetectedMs(ms);
+        } catch {}
       }
     };
     try { chromeApi?.runtime?.onMessage.addListener(onMsg); } catch {}
@@ -42,7 +45,12 @@ export default function PopupPage() {
         const tab = tabs?.[0];
         if (!tab?.id) return;
         chromeApi?.tabs?.sendMessage(tab.id, { action: 'extractDate' }, (res: any) => {
-          if (res?.date) setDetected(res.date);
+          if (res?.date) {
+            try {
+              const ms = new Date(String(res.date).replace(' (UTC)', '')).getTime();
+              if (!Number.isNaN(ms)) setDetectedMs(ms);
+            } catch {}
+          }
         });
       });
     } catch {}
@@ -65,7 +73,7 @@ export default function PopupPage() {
 
   const extract = async () => {
     setError(null);
-    setDate(null);
+    setDateMs(null);
     if (!validateUrl(url)) {
       setError('Please enter a valid TikTok or LinkedIn URL');
       return;
@@ -77,7 +85,7 @@ export default function PopupPage() {
         if (!id) throw new Error('Invalid TikTok video ID');
         const seconds = (BigInt(id) >> 32n);
         const ms = Number(seconds) * 1000;
-        setDate(new Date(ms).toUTCString() + ' (UTC)');
+        setDateMs(ms);
       } else if (/linkedin\.com/i.test(url)) {
         const decoded = decodeURIComponent(url);
         const commentMatch = /fsd_comment:\((\d+),urn:li:activity:\d+\)/i.exec(decoded);
@@ -86,7 +94,7 @@ export default function PopupPage() {
         // LinkedIn IDs are 64-bit snowflakes with 41-bit millisecond timestamp in the high bits
         // Right shift by 23 to keep the first 41 bits
         const ms = Number(BigInt(id) >> 23n);
-        setDate(new Date(ms).toUTCString() + ' (UTC)');
+        setDateMs(ms);
       }
     } catch (e: any) {
       setError(e?.message || 'Extraction failed');
@@ -100,16 +108,45 @@ export default function PopupPage() {
     navigator.clipboard.writeText(text);
   };
 
-  const formatDate = (isoText?: string | null) => {
-    if (!isoText) return '';
-    const d = new Date(isoText.replace(' (UTC)', ''));
-    return useUtc ? d.toUTCString() + ' (UTC)' : d.toLocaleString();
+  const formatUtc = (ms?: number | null) => {
+    if (!ms && ms !== 0) return '';
+    return new Date(ms).toUTCString() + ' (UTC)';
   };
 
-  const relativeTimeFromNow = (isoText?: string | null) => {
-    if (!isoText) return '';
-    const d = new Date(isoText.replace(' (UTC)', ''));
-    const diffMs = Date.now() - d.getTime();
+  const formatLocal = (ms?: number | null) => {
+    if (!ms && ms !== 0) return '';
+    const d = new Date(ms);
+    return d.toLocaleString(undefined, {
+      weekday: 'short', year: 'numeric', month: 'short', day: 'numeric',
+      hour: '2-digit', minute: '2-digit', second: '2-digit'
+    });
+  };
+
+  const formatIso = (ms?: number | null) => {
+    if (!ms && ms !== 0) return '';
+    return new Date(ms).toISOString();
+  };
+
+  const formatFull = (ms?: number | null, utc = true) => {
+    if (!ms && ms !== 0) return '';
+    const d = new Date(ms);
+    if (utc) {
+      const parts = new Intl.DateTimeFormat('en-US', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+        hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'UTC', timeZoneName: 'short'
+      }).formatToParts(d);
+      return parts.map(p => p.value).join('');
+    }
+    const parts = new Intl.DateTimeFormat(undefined, {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+      hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short'
+    }).formatToParts(d);
+    return parts.map(p => p.value).join('');
+  };
+
+  const relativeTimeFromNow = (ms?: number | null) => {
+    if (!ms && ms !== 0) return '';
+    const diffMs = Date.now() - ms;
     const abs = Math.abs(diffMs);
     const mins = Math.floor(abs / 60000);
     if (mins < 1) return 'just now';
@@ -154,44 +191,67 @@ export default function PopupPage() {
             <span className="material-icons">schedule</span>
             Extract
           </button>
-          <button onClick={() => { setUrl(''); setError(null); setDate(null); }} aria-label="Clear input field">
+          <button onClick={() => { setUrl(''); setError(null); setDateMs(null); }} aria-label="Clear input field">
             <span className="material-icons">clear</span>
           </button>
         </div>
         {error && <div id="urlValidation" className="error" role="alert" aria-live="polite">{error}</div>}
         {loading && <div id="loader" className="loader" role="status" aria-label="Loading"><span className="sr-only">Loading...</span></div>}
-        {date && (
+        {dateMs !== null && (
           <div id="result" className="result" role="status" aria-live="polite">
-            <div className="result-row">
-              <div className="result-main">
-                <div className="result-label">Post Date</div>
-                <div className="result-value" id="date">{formatDate(date)}</div>
-                <div className="result-sub">{relativeTimeFromNow(date)}</div>
+            <div className="date-hero">
+              <div className="date-hero-top">{useUtc ? 'UTC' : 'Local'}</div>
+              <div className="date-hero-main">{formatFull(dateMs, useUtc)}</div>
+              <div className="date-hero-sub">{relativeTimeFromNow(dateMs)}</div>
+            </div>
+            <div className="date-lines">
+              <div className="date-line">
+                <span>UTC</span>
+                <code>{formatUtc(dateMs)}</code>
+                <button onClick={() => copy(formatUtc(dateMs))}><span className="material-icons">content_copy</span></button>
               </div>
-              <div className="result-actions">
-                <button onClick={() => copy(formatDate(date))} aria-label="Copy date to clipboard">
-                  <span className="material-icons">content_copy</span>
-                  <span>Copy</span>
-                </button>
+              <div className="date-line">
+                <span>Local</span>
+                <code>{formatLocal(dateMs)}</code>
+                <button onClick={() => copy(formatLocal(dateMs))}><span className="material-icons">content_copy</span></button>
+              </div>
+              <div className="date-line">
+                <span>ISO 8601</span>
+                <code>{formatIso(dateMs)}</code>
+                <button onClick={() => copy(formatIso(dateMs))}><span className="material-icons">content_copy</span></button>
+              </div>
+              <div className="date-line">
+                <span>Unix</span>
+                <code>{Math.floor(dateMs / 1000)}</code>
+                <button onClick={() => copy(String(Math.floor(dateMs / 1000)))}><span className="material-icons">content_copy</span></button>
               </div>
             </div>
           </div>
         )}
       </section>
 
-      {detected && (
+      {detectedMs !== null && (
         <section id="auto-detect" className="card" role="status" aria-live="polite">
-          <div className="result-row">
-            <div className="result-main">
-              <div className="result-label">Detected Post Date</div>
-              <div className="result-value" id="detected-date">{formatDate(detected)}</div>
-              <div className="result-sub">{relativeTimeFromNow(detected)}</div>
+          <div className="date-hero small">
+            <div className="date-hero-top">Detected • {useUtc ? 'UTC' : 'Local'}</div>
+            <div className="date-hero-main" id="detected-date">{formatFull(detectedMs, useUtc)}</div>
+            <div className="date-hero-sub">{relativeTimeFromNow(detectedMs)}</div>
+          </div>
+          <div className="date-lines">
+            <div className="date-line">
+              <span>UTC</span>
+              <code>{formatUtc(detectedMs)}</code>
+              <button onClick={() => copy(formatUtc(detectedMs))}><span className="material-icons">content_copy</span></button>
             </div>
-            <div className="result-actions">
-              <button onClick={() => copy(formatDate(detected))} aria-label="Copy detected date to clipboard">
-                <span className="material-icons">content_copy</span>
-                <span>Copy</span>
-              </button>
+            <div className="date-line">
+              <span>Local</span>
+              <code>{formatLocal(detectedMs)}</code>
+              <button onClick={() => copy(formatLocal(detectedMs))}><span className="material-icons">content_copy</span></button>
+            </div>
+            <div className="date-line">
+              <span>ISO 8601</span>
+              <code>{formatIso(detectedMs)}</code>
+              <button onClick={() => copy(formatIso(detectedMs))}><span className="material-icons">content_copy</span></button>
             </div>
           </div>
         </section>
