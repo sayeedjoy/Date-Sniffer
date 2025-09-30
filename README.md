@@ -31,7 +31,7 @@ Post ID: 7142553576898773292
 Extracted Date: Mon, 13 Nov 2023 15:30:45 GMT (UTC)
 ```
 
-## Installation
+## Installation Process
 
 1. Clone this repository or download the ZIP file
 2. Install dependencies and build the extension popup with Next.js
