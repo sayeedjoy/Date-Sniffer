@@ -1,27 +1,96 @@
-# Dependencies
+# -----------------------
+# Node / package managers
+# -----------------------
 node_modules/
-
-# Next.js build outputs
-.next/
-out/
-dist/
-
-# Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+# npm pack output
+*.tgz
 
+# -----------------------
+# Next.js / build outputs
+# -----------------------
+/.next/
+/out/
+dist/
+.turbo/
+.vercel/
+
+# Optional: Next.js standalone output (if using output: 'standalone')
+# .next/standalone/
+
+# -----------------------
+# Caches / tooling
+# -----------------------
+.eslintcache
+.stylelintcache
+*.tsbuildinfo
+.cache/
+.parcel-cache/
+.nyc_output/
+coverage/
+
+# Storybook
+storybook-static/
+
+# Playwright / Cypress
+playwright-report/
+test-results/
+.cypress-cache/
+cypress/videos/
+cypress/screenshots/
+
+# -----------------------
 # Environment variables
+# -----------------------
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+# keep sample envs committed
+!.env.example
+!.env.*.example
 
+# -----------------------
+# Logs
+# -----------------------
+logs/
+*.log
+*.log.*
+lerna-debug.log*
+
+# -----------------------
 # OS-specific files
+# -----------------------
 .DS_Store
+.DS_Store?
 Thumbs.db
+ehthumbs.db
+Icon?
+# macOS metadata
+._*
 
-# VS Code settings
+# -----------------------
+# Editors / IDEs
+# -----------------------
 .vscode/
+.idea/
+*.code-workspace
+
+# -----------------------
+# Misc
+# -----------------------
+# Yarn v2+ zero-installs cache (uncomment if not using it)
+# .yarn/*
+# !.yarn/releases
+# !.yarn/plugins
+# !.yarn/sdks
+# !.yarn/versions
+
+# Local SQLite or dev DBs (uncomment if applicable)
+# *.sqlite
+# *.sqlite-journal
+# prisma/*.db
