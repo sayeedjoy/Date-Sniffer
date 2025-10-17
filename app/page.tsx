@@ -92,8 +92,8 @@ export default function PopupPage() {
         const id = commentMatch?.[1] || /([0-9]{19})/i.exec(decoded)?.[1];
         if (!id) throw new Error('Could not extract LinkedIn ID');
         // LinkedIn IDs are 64-bit snowflakes with 41-bit millisecond timestamp in the high bits
-        // Right shift by 23 to keep the first 41 bits
-        const ms = Number(BigInt(id) >> 23n);
+        // Right shift by 22 to keep the first 41 bits (drop 10 + 12 bits)
+        const ms = Number(BigInt(id) >> 22n);
         setDateMs(ms);
       }
     } catch (e: any) {
@@ -208,22 +208,18 @@ export default function PopupPage() {
               <div className="date-line">
                 <span>UTC</span>
                 <code>{formatUtc(dateMs)}</code>
-                <button onClick={() => copy(formatUtc(dateMs))}><span className="material-icons">content_copy</span></button>
               </div>
               <div className="date-line">
                 <span>Local</span>
                 <code>{formatLocal(dateMs)}</code>
-                <button onClick={() => copy(formatLocal(dateMs))}><span className="material-icons">content_copy</span></button>
               </div>
               <div className="date-line">
                 <span>ISO 8601</span>
                 <code>{formatIso(dateMs)}</code>
-                <button onClick={() => copy(formatIso(dateMs))}><span className="material-icons">content_copy</span></button>
               </div>
               <div className="date-line">
                 <span>Unix</span>
                 <code>{Math.floor(dateMs / 1000)}</code>
-                <button onClick={() => copy(String(Math.floor(dateMs / 1000)))}><span className="material-icons">content_copy</span></button>
               </div>
             </div>
           </div>
@@ -241,17 +237,14 @@ export default function PopupPage() {
             <div className="date-line">
               <span>UTC</span>
               <code>{formatUtc(detectedMs)}</code>
-              <button onClick={() => copy(formatUtc(detectedMs))}><span className="material-icons">content_copy</span></button>
             </div>
             <div className="date-line">
               <span>Local</span>
               <code>{formatLocal(detectedMs)}</code>
-              <button onClick={() => copy(formatLocal(detectedMs))}><span className="material-icons">content_copy</span></button>
             </div>
             <div className="date-line">
               <span>ISO 8601</span>
               <code>{formatIso(detectedMs)}</code>
-              <button onClick={() => copy(formatIso(detectedMs))}><span className="material-icons">content_copy</span></button>
             </div>
           </div>
         </section>

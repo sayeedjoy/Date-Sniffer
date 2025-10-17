@@ -55,8 +55,8 @@ function extractLinkedInTimestamp(id) {
   if (!id) return null;
   try {
       // LinkedIn snowflake: 41-bit millisecond timestamp in high bits
-      // Shift right by 23 to drop sequence & worker bits
-      const ms = BigInt(id) >> 23n;
+      // Shift right by 22 to drop sequence & worker bits (10 + 12 bits)
+      const ms = BigInt(id) >> 22n;
       return Number(ms);
   } catch (error) {
       console.error('Error extracting LinkedIn timestamp:', error);

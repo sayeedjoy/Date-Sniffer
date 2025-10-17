@@ -13,7 +13,7 @@ pnpm-debug.log*
 # Next.js / build outputs
 # -----------------------
 /.next/
-/out/
+out/
 dist/
 .turbo/
 .vercel/
@@ -79,18 +79,3 @@ Icon?
 .vscode/
 .idea/
 *.code-workspace
-
-# -----------------------
-# Misc
-# -----------------------
-# Yarn v2+ zero-installs cache (uncomment if not using it)
-# .yarn/*
-# !.yarn/releases
-# !.yarn/plugins
-# !.yarn/sdks
-# !.yarn/versions
-
-# Local SQLite or dev DBs (uncomment if applicable)
-# *.sqlite
-# *.sqlite-journal
-# prisma/*.db
