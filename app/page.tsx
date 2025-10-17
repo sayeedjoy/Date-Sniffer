@@ -44,7 +44,20 @@ export default function PopupPage() {
       chromeApi?.tabs?.query({ active: true, currentWindow: true }, (tabs: any[]) => {
         const tab = tabs?.[0];
         if (!tab?.id) return;
+        
+        // Check if tab URL matches supported sites
+        const url = tab?.url || '';
+        if (!url.includes('tiktok.com') && !url.includes('linkedin.com')) {
+          return; // Skip if not on supported site
+        }
+        
         chromeApi?.tabs?.sendMessage(tab.id, { action: 'extractDate' }, (res: any) => {
+          // Handle chrome.runtime.lastError to prevent console errors
+          if (chromeApi?.runtime?.lastError) {
+            // Silently ignore - content script may not be loaded yet
+            return;
+          }
+          
           if (res?.date) {
             try {
               const ms = new Date(String(res.date).replace(' (UTC)', '')).getTime();

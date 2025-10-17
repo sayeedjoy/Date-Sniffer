@@ -98,11 +98,27 @@ function observeLinkedInPage() {
 
 // Utility Functions
 function sendDateToPopup(platform, date) {
-  chrome.runtime.sendMessage({
-      type: 'DATE_DETECTED',
-      platform: platform,
-      date: date
-  });
+  // Check if extension context is valid before sending message
+  if (!chrome.runtime || !chrome.runtime.id) {
+    return; // Extension context invalidated, silently return
+  }
+  
+  try {
+    chrome.runtime.sendMessage({
+        type: 'DATE_DETECTED',
+        platform: platform,
+        date: date
+    }, (response) => {
+      // Handle potential errors in callback
+      if (chrome.runtime.lastError) {
+        // Silently ignore - extension was likely reloaded
+        return;
+      }
+    });
+  } catch (error) {
+    // Silently catch any errors to prevent console errors in production
+    return;
+  }
 }
 
 // Initialize based on current site
@@ -116,40 +132,47 @@ function init() {
 }
 
 // Message listener for manual extraction requests
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === 'extractDate') {
-      const host = window.location.hostname;
-      let date = null;
+if (chrome.runtime && chrome.runtime.onMessage) {
+  chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    try {
+      if (request.action === 'extractDate') {
+          const host = window.location.hostname;
+          let date = null;
 
-      if (host.includes('tiktok.com')) {
-          const match = window.location.pathname.match(/\/video\/(\d+)/);
-          if (match && match[1]) {
-              const timestamp = extractTikTokTimestamp(match[1]);
+          if (host.includes('tiktok.com')) {
+              const match = window.location.pathname.match(/\/video\/(\d+)/);
+              if (match && match[1]) {
+                  const timestamp = extractTikTokTimestamp(match[1]);
+                  if (timestamp) {
+                      date = new Date(timestamp).toUTCString() + " (UTC)";
+                  }
+              }
+          } else if (host.includes('linkedin.com')) {
+              const url = window.location.href;
+              const postId = extractLinkedInPostId(url);
+              const commentId = extractLinkedInCommentId(url);
+              
+              let timestamp = null;
+              if (commentId) {
+                  timestamp = extractLinkedInTimestamp(commentId);
+              } else if (postId) {
+                  timestamp = extractLinkedInTimestamp(postId);
+              }
+
               if (timestamp) {
                   date = new Date(timestamp).toUTCString() + " (UTC)";
               }
           }
-      } else if (host.includes('linkedin.com')) {
-          const url = window.location.href;
-          const postId = extractLinkedInPostId(url);
-          const commentId = extractLinkedInCommentId(url);
-          
-          let timestamp = null;
-          if (commentId) {
-              timestamp = extractLinkedInTimestamp(commentId);
-          } else if (postId) {
-              timestamp = extractLinkedInTimestamp(postId);
-          }
 
-          if (timestamp) {
-              date = new Date(timestamp).toUTCString() + " (UTC)";
-          }
+          sendResponse({ date: date });
       }
-
-      sendResponse({ date: date });
-  }
-  return true;
-});
+    } catch (error) {
+      // Silently handle errors
+      sendResponse({ date: null });
+    }
+    return true;
+  });
+}
 
 // Initialize on load
 if (document.readyState === 'loading') {
