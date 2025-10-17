@@ -8,7 +8,7 @@
 }
 
 body {
-  width: 380px;
+  width: 450px;
   min-height: 300px;
   padding: 0;
   margin: 0;
@@ -168,38 +168,34 @@ body {
 }
 
 .input-section { 
-  display: grid; 
-  grid-template-columns: 1fr auto auto; 
-  gap: 10px; 
-  align-items: center; 
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 input { 
-  min-width: 0;
-  flex: 1;
-  padding: 14px 18px;
+  width: 100%;
+  padding: 16px 18px;
   border: 2px solid var(--border-color);
   border-radius: var(--radius-md);
   font-size: 14px;
   font-weight: 500;
-  background-color: var(--card-bg);
+  background-color: var(--bg-color);
   color: var(--text-color);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
   box-shadow: var(--shadow-sm);
-  backdrop-filter: blur(10px);
   font-family: inherit;
+  box-sizing: border-box;
 }
 
 input:hover {
   border-color: var(--primary-color);
-  box-shadow: var(--shadow-md);
 }
 
 input:focus {
   border-color: var(--primary-color);
-  box-shadow: var(--focus-ring), var(--shadow-md);
+  box-shadow: var(--focus-ring);
   outline: none;
-  background-color: var(--bg-color);
 }
 
 input::placeholder {
@@ -207,21 +203,27 @@ input::placeholder {
   font-weight: 400;
 }
 
+.button-row {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
 button {
-  padding: 10px 16px;
+  padding: 12px 20px;
   background: var(--primary-color);
   color: white;
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   cursor: pointer;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   transition: all 0.2s ease;
   box-shadow: var(--shadow-sm);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
   font-family: inherit;
 }
 
@@ -242,7 +244,33 @@ button:disabled {
 }
 
 button .material-icons {
-  font-size: 16px;
+  font-size: 18px;
+}
+
+.button-row .primary-btn {
+  flex: 1;
+  background: var(--primary-color);
+}
+
+.button-row .primary-btn:hover {
+  background: var(--primary-hover);
+}
+
+.button-row .secondary-btn {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 2px solid var(--border-color);
+  box-shadow: none;
+}
+
+.button-row .secondary-btn:hover {
+  background: var(--border-color);
+  color: var(--text-color);
+  border-color: var(--text-secondary);
+}
+
+.button-row .secondary-btn:active {
+  transform: scale(0.98);
 }
 
 .error {
@@ -310,9 +338,9 @@ button .material-icons {
   border-radius: var(--radius-md);
   padding: 20px;
   margin-top: 0;
-  border: 1px solid var(--card-border);
+  border: none;
   animation: fadeIn 0.3s ease;
-  box-shadow: var(--shadow-sm);
+  box-shadow: none;
   transition: all 0.2s ease;
 }
 
@@ -337,6 +365,7 @@ button .material-icons {
   background: var(--primary-light);
   border-radius: var(--radius-sm);
   margin-bottom: 16px;
+  border: none;
 }
 
 .date-hero.small { 
@@ -351,6 +380,29 @@ button .material-icons {
   letter-spacing: 0.5px;
   color: var(--text-secondary);
   margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--success-color);
+  border-radius: 50%;
+  display: inline-block;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
 }
 
 .date-hero-main { 
@@ -381,6 +433,7 @@ button .material-icons {
   background: var(--primary-light);
   border-radius: var(--radius-sm);
   transition: background 0.2s ease;
+  border: none;
 }
 
 .date-line:hover {
@@ -393,7 +446,7 @@ button .material-icons {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--text-secondary);
-  min-width: 60px;
+  min-width: 70px;
   flex-shrink: 0;
 }
 
@@ -405,9 +458,10 @@ button .material-icons {
   font-weight: 500;
   color: var(--text-color);
   font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  white-space: normal;
+  line-height: 1.4;
 }
 
 .date-line button { 

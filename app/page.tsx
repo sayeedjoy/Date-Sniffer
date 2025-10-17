@@ -187,13 +187,16 @@ export default function PopupPage() {
             placeholder="Paste TikTok or LinkedIn URL"
             aria-label="URL input field"
           />
-          <button onClick={extract} disabled={!url} aria-label="Extract date from URL">
-            <span className="material-icons">schedule</span>
-            Extract
-          </button>
-          <button onClick={() => { setUrl(''); setError(null); setDateMs(null); }} aria-label="Clear input field">
-            <span className="material-icons">clear</span>
-          </button>
+          <div className="button-row">
+            <button onClick={extract} disabled={!url} aria-label="Extract date from URL" className="primary-btn">
+              <span className="material-icons">schedule</span>
+              Get Date
+            </button>
+            <button onClick={() => { setUrl(''); setError(null); setDateMs(null); }} aria-label="Clear input field" className="secondary-btn">
+              <span className="material-icons">clear</span>
+              Clear
+            </button>
+          </div>
         </div>
         {error && <div id="urlValidation" className="error" role="alert" aria-live="polite">{error}</div>}
         {loading && <div id="loader" className="loader" role="status" aria-label="Loading"><span className="sr-only">Loading...</span></div>}
@@ -229,7 +232,10 @@ export default function PopupPage() {
       {detectedMs !== null && (
         <section id="auto-detect" className="card" role="status" aria-live="polite">
           <div className="date-hero small">
-            <div className="date-hero-top">Detected • {useUtc ? 'UTC' : 'Local'}</div>
+            <div className="date-hero-top">
+              <span className="status-dot"></span>
+              Detected • {useUtc ? 'UTC' : 'Local'}
+            </div>
             <div className="date-hero-main" id="detected-date">{formatFull(detectedMs, useUtc)}</div>
             <div className="date-hero-sub">{relativeTimeFromNow(detectedMs)}</div>
           </div>
