@@ -1,1 +1,0 @@
-self.__next_f.push([1,"a:[[\"$\",\"meta\",\"0\",{\"name\":\"viewport\",\"content\":\"width=device-width, initial-scale=1\"}],[\"$\",\"meta\",\"1\",{\"charSet\":\"utf-8\"}],[\"$\",\"title\",\"2\",{\"children\":\"Date Sniffer\"}],[\"$\",\"meta\",\"3\",{\"name\":\"description\",\"content\":\"Extract post dates from TikTok and LinkedIn\"}]]\n3:null\n"])

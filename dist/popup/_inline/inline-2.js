@@ -1,1 +1,0 @@
-self.__next_f.push([1,"1:HL[\"./_next/static/css/352e3d4cc9c1c061.css\",\"style\"]\n"])
