@@ -15,6 +15,7 @@ pnpm-debug.log*
 /.next/
 out/
 dist/
+release/
 .turbo/
 .vercel/
 

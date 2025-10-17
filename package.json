@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build:web": "next build",
-    "build:extension": "npm run build:web && node scripts/build-extension.js"
+    "build:extension": "npm run build:web && node scripts/build-extension.js",
+    "package:release": "node scripts/package-release.js"
   },
   "dependencies": {
     "next": "^14.2.33",
@@ -15,6 +16,7 @@
   "devDependencies": {
     "@types/node": "24.3.0",
     "@types/react": "19.1.10",
+    "archiver": "^7.0.1",
     "typescript": "5.9.2"
   }
 }
