@@ -54,13 +54,11 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   urlInput.addEventListener('input', () => {
-    if (validateUrl(urlInput.value)) {
-      urlValidation.classList.add('hidden');
-      getDateBtn.disabled = false;
-    } else {
-      urlValidation.classList.remove('hidden');
-      getDateBtn.disabled = true;
-    }
+    const isValid = validateUrl(urlInput.value);
+    urlValidation.classList.toggle('hidden', isValid);
+    getDateBtn.disabled = !isValid;
+    result.classList.add('hidden');
+    loader.classList.add('hidden');
   });
 
   getDateBtn.addEventListener('click', getDate);
@@ -106,15 +104,19 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function getDate() {
-    const url = urlInput.value;
-    
-    if (!validateUrl(url)) {
+    const url = urlInput.value.trim();
+    const isValid = validateUrl(url);
+    if (!isValid) {
       urlValidation.classList.remove('hidden');
+      getDateBtn.disabled = true;
+      result.classList.add('hidden');
+      loader.classList.add('hidden');
       return;
     }
 
     loader.classList.remove('hidden');
     result.classList.add('hidden');
+    urlValidation.classList.add('hidden');
 
     if (url.includes('tiktok.com')) {
       processTikTokUrl(url);
@@ -197,6 +199,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loader.classList.add('hidden');
     urlValidation.textContent = message;
     urlValidation.classList.remove('hidden');
+    result.classList.add('hidden');
   }
 
   function clearFields() {
@@ -204,6 +207,9 @@ document.addEventListener('DOMContentLoaded', function() {
     result.classList.add('hidden');
     urlValidation.classList.add('hidden');
     getDateBtn.disabled = true;
+    loader.classList.add('hidden');
+    autoDetect.classList.add('hidden');
+    detectedDateEl.textContent = '';
   }
 
   function copyDate() {

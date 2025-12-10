@@ -34,16 +34,18 @@
       <span class="sr-only">Loading...</span>
     </div>
 
-    <div id="result" class="result hidden" role="status" aria-live="polite">
-      <p>Post Date: <span id="date"></span></p>
+    <div id="result" class="result-card hidden" role="status" aria-live="polite">
+      <p class="result-title">Post Date</p>
+      <p class="result-value"><span id="date"></span></p>
       <button id="copyBtn" aria-label="Copy date to clipboard">
         <span class="material-icons">content_copy</span>
         <span>Copy Date</span>
       </button>
     </div>
 
-    <div id="auto-detect" class="hidden" role="status" aria-live="polite">
-      <p>Detected Post Date: <span id="detected-date"></span></p>
+    <div id="auto-detect" class="result-card hidden" role="status" aria-live="polite">
+      <p class="result-title">Detected Post Date</p>
+      <p class="result-value"><span id="detected-date"></span></p>
       <button id="copy-detected" aria-label="Copy detected date to clipboard">
         <span class="material-icons">content_copy</span>
         <span>Copy Date</span>

@@ -163,7 +163,7 @@ button:disabled {
   to { opacity: 1; transform: translateY(0); }
 }
 
-.result, #auto-detect {
+.result-card {
   background-color: var(--result-bg);
   border-radius: 12px;
   padding: 20px;
@@ -174,16 +174,31 @@ button:disabled {
   transition: all 0.2s ease;
 }
 
-.result:hover, #auto-detect:hover {
+.result-card:hover {
   box-shadow: var(--shadow-md);
   transform: translateY(-1px);
 }
 
-.result p, #auto-detect p {
+.result-card p {
   margin: 0 0 16px 0;
   font-size: 14px;
   color: var(--text-color);
   opacity: 0.9;
+}
+
+.result-title {
+  margin: 0 0 6px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-color);
+  letter-spacing: -0.2px;
+}
+
+.result-value {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-color);
 }
 
 #date, #detected-date {
@@ -192,7 +207,7 @@ button:disabled {
   font-size: 16px;
 }
 
-#copyBtn, #copy-detected {
+.result-card button {
   background-color: transparent;
   color: var(--primary-color);
   border: 2px solid var(--primary-color);
@@ -202,7 +217,7 @@ button:disabled {
   transition: all 0.2s ease;
 }
 
-#copyBtn:hover, #copy-detected:hover {
+.result-card button:hover {
   background-color: var(--primary-color);
   color: white;
 }
