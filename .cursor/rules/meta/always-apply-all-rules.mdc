@@ -1,0 +1,44 @@
+---
+alwaysApply: true
+description: Meta-rule ensuring all rules in .cursor/rules/ directory are always followed in every conversation and project. This rule takes precedence and ensures comprehensive rule compliance.
+author: Himel Das
+---
+
+# Always Apply All Rules
+
+## Core Principle
+
+**Rules in the `.cursor/rules/` directory MUST be followed based on their `alwaysApply` setting:**
+- Rules with `alwaysApply: true` MUST be followed in EVERY conversation and project
+- Rules with `alwaysApply: false` should only be followed when relevant to the project context
+
+## Rule Application
+
+- Rules with `alwaysApply: true` in their frontmatter are automatically active in all conversations
+- Rules with `alwaysApply: false` are applied only when relevant to the specific project context
+- Rules are organized by category in subdirectories
+- Each rule file contains specific guidelines that must be followed when applicable
+- No rule should be ignored or bypassed unless explicitly overridden by a higher-priority rule
+
+## Enforcement
+
+- When implementing any feature or making any changes, verify compliance with ALL applicable rules
+- Apply rules with `alwaysApply: true` unconditionally
+- Apply rules with `alwaysApply: false` only when they match the project context (e.g., technology stack, project type, etc.)
+- If rules conflict, prioritize more specific rules over general ones
+- When in doubt, refer to the specific rule file for clarification
+- Rules are cumulative - all applicable rules must be followed simultaneously
+
+## Rule Discovery
+
+- Check `.cursor/rules/` directory structure to find relevant rules
+- Read rule files to understand specific requirements
+- Rules are self-documenting with clear DO/DON'T patterns
+
+## Priority
+
+This meta-rule has the highest priority and ensures that:
+- All rules with `alwaysApply: true` are discovered and applied in every conversation
+- Rules with `alwaysApply: false` are applied when contextually relevant
+- No rule is accidentally ignored when it should be active
+- Consistent behavior across all projects and conversations

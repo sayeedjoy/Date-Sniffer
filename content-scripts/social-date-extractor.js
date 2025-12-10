@@ -12,17 +12,21 @@ function extractTikTokTimestamp(videoId) {
 }
 
 function observeTikTokPage() {
-  const videoIdRegex = /\/video\/(\d+)/;
+  const mediaIdRegex = /\/(?:video|photo)\/(\d+)/;
 
   function extractDateFromUrl() {
-      const match = window.location.pathname.match(videoIdRegex);
-      if (match && match[1]) {
-          const timestamp = extractTikTokTimestamp(match[1]);
-          if (timestamp) {
-              const date = new Date(timestamp);
-              sendDateToPopup('tiktok', date.toUTCString() + " (UTC)");
-          }
-      }
+    const match = window.location.pathname.match(mediaIdRegex);
+    if (!match || !match[1]) {
+      return;
+    }
+
+    const timestamp = extractTikTokTimestamp(match[1]);
+    if (!timestamp) {
+      return;
+    }
+
+    const date = new Date(timestamp);
+    sendDateToPopup('tiktok', date.toUTCString() + " (UTC)");
   }
 
   // Initial check
@@ -140,13 +144,13 @@ if (chrome.runtime && chrome.runtime.onMessage) {
           let date = null;
 
           if (host.includes('tiktok.com')) {
-              const match = window.location.pathname.match(/\/video\/(\d+)/);
-              if (match && match[1]) {
-                  const timestamp = extractTikTokTimestamp(match[1]);
-                  if (timestamp) {
-                      date = new Date(timestamp).toUTCString() + " (UTC)";
-                  }
+          const match = window.location.pathname.match(/\/(?:video|photo)\/(\d+)/);
+          if (match && match[1]) {
+              const timestamp = extractTikTokTimestamp(match[1]);
+              if (timestamp) {
+                  date = new Date(timestamp).toUTCString() + " (UTC)";
               }
+          }
           } else if (host.includes('linkedin.com')) {
               const url = window.location.href;
               const postId = extractLinkedInPostId(url);
