@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 
 export default function PopupPage() {
@@ -14,7 +13,6 @@ export default function PopupPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isDark, setIsDark] = useState(false);
-  const [useUtc, setUseUtc] = useState(true);
 
   const chromeApi: any =
     typeof window !== "undefined" ? (window as any).chrome : undefined;
@@ -242,7 +240,7 @@ export default function PopupPage() {
     timestamp: number;
     badge?: React.ReactNode;
   }) => {
-    const formatted = formatFull(timestamp, useUtc);
+    const formatted = formatFull(timestamp, true);
     return (
       <Card className="bg-card/80 backdrop-blur">
         <CardHeader className="flex flex-row items-center justify-between space-y-0">
@@ -255,7 +253,7 @@ export default function PopupPage() {
         <CardContent className="space-y-4">
           <div className="rounded-lg border border-border/60 bg-muted/40 px-4 py-3">
             <div className="flex items-center justify-between text-xs uppercase text-muted-foreground">
-              <span>{useUtc ? "UTC" : "Local"}</span>
+              <span>UTC</span>
               <span className="flex items-center gap-1 text-xs">
                 <span className="material-icons text-sm text-primary">event</span>
                 {relativeTimeFromNow(timestamp)}
@@ -274,10 +272,10 @@ export default function PopupPage() {
           <div className="flex flex-wrap gap-2">
             <Button
               variant="outline"
-              onClick={() => copy(useUtc ? formatUtc(timestamp) : formatLocal(timestamp))}
+              onClick={() => copy(formatUtc(timestamp))}
             >
               <span className="material-icons text-base">content_copy</span>
-              Copy {useUtc ? "UTC" : "Local"}
+              Copy UTC
             </Button>
             <Button variant="ghost" onClick={() => copy(formatIso(timestamp))}>
               <span className="material-icons text-base">code</span>
@@ -293,7 +291,7 @@ export default function PopupPage() {
     <main className="bg-gradient-to-br from-background via-background to-muted/60 p-4 text-foreground">
       <div className="flex flex-col gap-4">
         <Card className="bg-card/90 shadow-glow">
-          <CardHeader className="flex flex-row items-start justify-between space-y-0">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <div>
               <p className="text-xs uppercase text-muted-foreground">Date Sniffer</p>
               <CardTitle className="mt-1 flex items-center gap-2 text-lg">
@@ -302,15 +300,6 @@ export default function PopupPage() {
               </CardTitle>
             </div>
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 rounded-md border border-border bg-muted/50 px-2 py-1">
-                <span className="text-xs text-muted-foreground">UTC</span>
-                <Switch
-                  aria-label="Toggle timezone"
-                  checked={!useUtc}
-                  onChange={(e) => setUseUtc(!e.target.checked)}
-                />
-                <span className="text-xs text-muted-foreground">Local</span>
-              </div>
               <Button
                 variant="ghost"
                 aria-label="Toggle dark mode"
