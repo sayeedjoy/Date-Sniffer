@@ -1,78 +1,115 @@
 "use client";
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { cn } from "@/lib/utils";
 
 export default function PopupPage() {
-  const [url, setUrl] = useState('');
+  const [url, setUrl] = useState("");
   const [dateMs, setDateMs] = useState<number | null>(null);
   const [detectedMs, setDetectedMs] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isDark, setIsDark] = useState(false);
-  const chromeApi: any = typeof window !== 'undefined' ? (window as any).chrome : undefined;
   const [useUtc, setUseUtc] = useState(true);
 
+  const chromeApi: any =
+    typeof window !== "undefined" ? (window as any).chrome : undefined;
+
   useEffect(() => {
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const prefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    ).matches;
     setIsDark(prefersDark);
-    document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+    document.documentElement.setAttribute(
+      "data-theme",
+      prefersDark ? "dark" : "light"
+    );
 
     try {
-      chromeApi?.storage?.local.get('isDarkMode', (data: any) => {
+      chromeApi?.storage?.local.get("isDarkMode", (data: any) => {
         const val = data?.isDarkMode;
-        if (typeof val === 'boolean') {
+        if (typeof val === "boolean") {
           setIsDark(val);
-          document.documentElement.setAttribute('data-theme', val ? 'dark' : 'light');
+          document.documentElement.setAttribute(
+            "data-theme",
+            val ? "dark" : "light"
+          );
         }
       });
-    } catch {}
+    } catch {
+      // noop
+    }
 
     const onMsg = (message: any) => {
-      if (message?.type === 'DATE_DETECTED' && message.date) {
+      if (message?.type === "DATE_DETECTED" && message.date) {
         try {
-          const ms = new Date(String(message.date).replace(' (UTC)', '')).getTime();
+          const ms = new Date(String(message.date).replace(" (UTC)", "")).getTime();
           if (!Number.isNaN(ms)) setDetectedMs(ms);
-        } catch {}
+        } catch {
+          // noop
+        }
       }
     };
-    try { chromeApi?.runtime?.onMessage.addListener(onMsg); } catch {}
-    return () => { try { chromeApi?.runtime?.onMessage.removeListener(onMsg); } catch {} };
-  }, []);
+
+    try {
+      chromeApi?.runtime?.onMessage.addListener(onMsg);
+    } catch {
+      // noop
+    }
+
+    return () => {
+      try {
+        chromeApi?.runtime?.onMessage.removeListener(onMsg);
+      } catch {
+        // noop
+      }
+    };
+  }, [chromeApi]);
 
   useEffect(() => {
-    // Try auto-detect from active tab
     try {
       chromeApi?.tabs?.query({ active: true, currentWindow: true }, (tabs: any[]) => {
         const tab = tabs?.[0];
         if (!tab?.id) return;
-        
-        // Check if tab URL matches supported sites
-        const url = tab?.url || '';
-        if (!url.includes('tiktok.com') && !url.includes('linkedin.com')) {
-          return; // Skip if not on supported site
+
+        const tabUrl = tab?.url || "";
+        if (!tabUrl.includes("tiktok.com") && !tabUrl.includes("linkedin.com")) {
+          return;
         }
-        
-        chromeApi?.tabs?.sendMessage(tab.id, { action: 'extractDate' }, (res: any) => {
-          // Handle chrome.runtime.lastError to prevent console errors
-          if (chromeApi?.runtime?.lastError) {
-            // Silently ignore - content script may not be loaded yet
-            return;
+
+        chromeApi?.tabs?.sendMessage(
+          tab.id,
+          { action: "extractDate" },
+          (res: any) => {
+            if (chromeApi?.runtime?.lastError) return;
+            if (res?.date) {
+              try {
+                const ms = new Date(String(res.date).replace(" (UTC)", "")).getTime();
+                if (!Number.isNaN(ms)) setDetectedMs(ms);
+              } catch {
+                // noop
+              }
+            }
           }
-          
-          if (res?.date) {
-            try {
-              const ms = new Date(String(res.date).replace(' (UTC)', '')).getTime();
-              if (!Number.isNaN(ms)) setDetectedMs(ms);
-            } catch {}
-          }
-        });
+        );
       });
-    } catch {}
-  }, []);
+    } catch {
+      // noop
+    }
+  }, [chromeApi]);
 
   const setTheme = (nextIsDark: boolean) => {
     setIsDark(nextIsDark);
-    document.documentElement.setAttribute('data-theme', nextIsDark ? 'dark' : 'light');
-    try { chromeApi?.storage?.local.set({ isDarkMode: nextIsDark }); } catch {}
+    document.documentElement.setAttribute("data-theme", nextIsDark ? "dark" : "light");
+    try {
+      chromeApi?.storage?.local.set({ isDarkMode: nextIsDark });
+    } catch {
+      // noop
+    }
   };
 
   const validateUrl = (u: string) => {
@@ -81,36 +118,40 @@ export default function PopupPage() {
     const linkedinActivity = /linkedin\.com\/.*urn:li:activity:\d{10,}/i;
     const linkedinId = /linkedin\.com.*[^0-9]([0-9]{19})/i;
     const linkedinComment = /fsd_comment:\((\d+),urn:li:activity:\d+\)/i;
-    return tiktok.test(u) || linkedinActivity.test(u) || linkedinId.test(u) || linkedinComment.test(u);
+    return (
+      tiktok.test(u) ||
+      linkedinActivity.test(u) ||
+      linkedinId.test(u) ||
+      linkedinComment.test(u)
+    );
   };
 
   const extract = async () => {
     setError(null);
     setDateMs(null);
     if (!validateUrl(url)) {
-      setError('Please enter a valid TikTok or LinkedIn URL');
+      setError("Please enter a valid TikTok or LinkedIn URL");
       return;
     }
     setLoading(true);
     try {
       if (/tiktok\.com/i.test(url)) {
         const id = /\/(video|photo)\/(\d{8,20})/i.exec(url)?.[2];
-        if (!id) throw new Error('Invalid TikTok video ID');
-        const seconds = (BigInt(id) >> 32n);
+        if (!id) throw new Error("Invalid TikTok video ID");
+        const seconds = BigInt(id) >> 32n;
         const ms = Number(seconds) * 1000;
         setDateMs(ms);
       } else if (/linkedin\.com/i.test(url)) {
         const decoded = decodeURIComponent(url);
-        const commentMatch = /fsd_comment:\((\d+),urn:li:activity:\d+\)/i.exec(decoded);
+        const commentMatch =
+          /fsd_comment:\((\d+),urn:li:activity:\d+\)/i.exec(decoded);
         const id = commentMatch?.[1] || /([0-9]{19})/i.exec(decoded)?.[1];
-        if (!id) throw new Error('Could not extract LinkedIn ID');
-        // LinkedIn IDs are 64-bit snowflakes with 41-bit millisecond timestamp in the high bits
-        // Right shift by 22 to keep the first 41 bits (drop 10 + 12 bits)
+        if (!id) throw new Error("Could not extract LinkedIn ID");
         const ms = Number(BigInt(id) >> 22n);
         setDateMs(ms);
       }
     } catch (e: any) {
-      setError(e?.message || 'Extraction failed');
+      setError(e?.message || "Extraction failed");
     } finally {
       setLoading(false);
     }
@@ -122,47 +163,65 @@ export default function PopupPage() {
   };
 
   const formatUtc = (ms?: number | null) => {
-    if (!ms && ms !== 0) return '';
-    return new Date(ms).toUTCString() + ' (UTC)';
+    if (!ms && ms !== 0) return "";
+    return new Date(ms).toUTCString() + " (UTC)";
   };
 
   const formatLocal = (ms?: number | null) => {
-    if (!ms && ms !== 0) return '';
+    if (!ms && ms !== 0) return "";
     const d = new Date(ms);
     return d.toLocaleString(undefined, {
-      weekday: 'short', year: 'numeric', month: 'short', day: 'numeric',
-      hour: '2-digit', minute: '2-digit', second: '2-digit'
+      weekday: "short",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
     });
   };
 
   const formatIso = (ms?: number | null) => {
-    if (!ms && ms !== 0) return '';
+    if (!ms && ms !== 0) return "";
     return new Date(ms).toISOString();
   };
 
   const formatFull = (ms?: number | null, utc = true) => {
-    if (!ms && ms !== 0) return '';
+    if (!ms && ms !== 0) return "";
     const d = new Date(ms);
     if (utc) {
-      const parts = new Intl.DateTimeFormat('en-US', {
-        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-        hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'UTC', timeZoneName: 'short'
+      const parts = new Intl.DateTimeFormat("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        timeZone: "UTC",
+        timeZoneName: "short",
       }).formatToParts(d);
-      return parts.map(p => p.value).join('');
+      return parts.map((p) => p.value).join("");
     }
     const parts = new Intl.DateTimeFormat(undefined, {
-      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-      hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short'
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      timeZoneName: "short",
     }).formatToParts(d);
-    return parts.map(p => p.value).join('');
+    return parts.map((p) => p.value).join("");
   };
 
   const relativeTimeFromNow = (ms?: number | null) => {
-    if (!ms && ms !== 0) return '';
+    if (!ms && ms !== 0) return "";
     const diffMs = Date.now() - ms;
     const abs = Math.abs(diffMs);
     const mins = Math.floor(abs / 60000);
-    if (mins < 1) return 'just now';
+    if (mins < 1) return "just now";
     if (mins < 60) return `${mins}m ago`;
     const hrs = Math.floor(mins / 60);
     if (hrs < 24) return `${hrs}h ago`;
@@ -174,100 +233,183 @@ export default function PopupPage() {
     return `${years}y ago`;
   };
 
+  const renderDateCard = ({
+    title,
+    timestamp,
+    badge,
+  }: {
+    title: string;
+    timestamp: number;
+    badge?: React.ReactNode;
+  }) => {
+    const formatted = formatFull(timestamp, useUtc);
+    return (
+      <Card className="bg-card/80 backdrop-blur">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <span className="material-icons text-primary">schedule</span>
+            {title}
+          </CardTitle>
+          {badge}
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="rounded-lg border border-border/60 bg-muted/40 px-4 py-3">
+            <div className="flex items-center justify-between text-xs uppercase text-muted-foreground">
+              <span>{useUtc ? "UTC" : "Local"}</span>
+              <span className="flex items-center gap-1 text-xs">
+                <span className="material-icons text-sm text-primary">event</span>
+                {relativeTimeFromNow(timestamp)}
+              </span>
+            </div>
+            <div className="mt-2 text-sm font-semibold leading-6 text-foreground">
+              {formatted}
+            </div>
+          </div>
+          <div className="space-y-2 text-sm">
+            <InfoRow label="UTC" value={formatUtc(timestamp)} />
+            <InfoRow label="Local" value={formatLocal(timestamp)} />
+            <InfoRow label="ISO 8601" value={formatIso(timestamp)} />
+            <InfoRow label="Unix" value={Math.floor(timestamp / 1000).toString()} />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              onClick={() => copy(useUtc ? formatUtc(timestamp) : formatLocal(timestamp))}
+            >
+              <span className="material-icons text-base">content_copy</span>
+              Copy {useUtc ? "UTC" : "Local"}
+            </Button>
+            <Button variant="ghost" onClick={() => copy(formatIso(timestamp))}>
+              <span className="material-icons text-base">code</span>
+              Copy ISO
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
   return (
-    <div className="container">
-      <header className="header">
-        <div className="title">
-          <span className="material-icons">event</span>
-          <h2>Date Sniffer</h2>
-        </div>
-        <div className="header-actions">
-          <div className="tz-toggle" role="group" aria-label="Timezone toggle">
-            <button className={useUtc ? 'active' : ''} onClick={() => setUseUtc(true)}>UTC</button>
-            <button className={!useUtc ? 'active' : ''} onClick={() => setUseUtc(false)}>Local</button>
-          </div>
-          <button className="theme-toggle" onClick={() => setTheme(!isDark)} aria-label="Toggle dark mode">
-            <span className="material-icons">{isDark ? 'light_mode' : 'dark_mode'}</span>
-          </button>
-        </div>
-      </header>
+    <main className="bg-gradient-to-br from-background via-background to-muted/60 p-4 text-foreground">
+      <div className="flex flex-col gap-4">
+        <Card className="bg-card/90 shadow-glow">
+          <CardHeader className="flex flex-row items-start justify-between space-y-0">
+            <div>
+              <p className="text-xs uppercase text-muted-foreground">Date Sniffer</p>
+              <CardTitle className="mt-1 flex items-center gap-2 text-lg">
+                <span className="material-icons text-primary">event</span>
+                Extract post dates
+              </CardTitle>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 rounded-md border border-border bg-muted/50 px-2 py-1">
+                <span className="text-xs text-muted-foreground">UTC</span>
+                <Switch
+                  aria-label="Toggle timezone"
+                  checked={!useUtc}
+                  onChange={(e) => setUseUtc(!e.target.checked)}
+                />
+                <span className="text-xs text-muted-foreground">Local</span>
+              </div>
+              <Button
+                variant="ghost"
+                aria-label="Toggle dark mode"
+                onClick={() => setTheme(!isDark)}
+                className="h-9 w-9 px-0"
+              >
+                <span className="material-icons text-base">
+                  {isDark ? "light_mode" : "dark_mode"}
+                </span>
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-muted-foreground">
+                Post URL
+              </label>
+              <Input
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                placeholder="https://www.tiktok.com/@user/video/123..."
+                aria-label="URL input field"
+              />
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  onClick={extract}
+                  disabled={!url || loading}
+                  aria-label="Extract date from URL"
+                  className="flex-1"
+                >
+                  <span className="material-icons text-base">
+                    {loading ? "hourglass_empty" : "schedule"}
+                  </span>
+                  {loading ? "Extracting..." : "Extract date"}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setUrl("");
+                    setError(null);
+                    setDateMs(null);
+                  }}
+                  disabled={loading}
+                  aria-label="Clear input field"
+                >
+                  <span className="material-icons text-base">clear</span>
+                  Clear
+                </Button>
+              </div>
+            </div>
 
-      <section className="card">
-        <div className="input-section">
-          <input
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            placeholder="Paste TikTok or LinkedIn URL"
-            aria-label="URL input field"
-          />
-          <div className="button-row">
-            <button onClick={extract} disabled={!url} aria-label="Extract date from URL" className="primary-btn">
-              <span className="material-icons">schedule</span>
-              Get Date
-            </button>
-            <button onClick={() => { setUrl(''); setError(null); setDateMs(null); }} aria-label="Clear input field" className="secondary-btn">
-              <span className="material-icons">clear</span>
-              Clear
-            </button>
-          </div>
-        </div>
-        {error && <div id="urlValidation" className="error" role="alert" aria-live="polite">{error}</div>}
-        {loading && <div id="loader" className="loader" role="status" aria-label="Loading"><span className="sr-only">Loading...</span></div>}
-        {dateMs !== null && (
-          <div id="result" className="result" role="status" aria-live="polite">
-            <div className="date-hero">
-              <div className="date-hero-top">{useUtc ? 'UTC' : 'Local'}</div>
-              <div className="date-hero-main">{formatFull(dateMs, useUtc)}</div>
-              <div className="date-hero-sub">{relativeTimeFromNow(dateMs)}</div>
-            </div>
-            <div className="date-lines">
-              <div className="date-line">
-                <span>UTC</span>
-                <code>{formatUtc(dateMs)}</code>
+            {error && (
+              <div
+                className="flex items-center gap-2 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+                role="alert"
+                aria-live="polite"
+              >
+                <span className="material-icons text-base">error_outline</span>
+                {error}
               </div>
-              <div className="date-line">
-                <span>Local</span>
-                <code>{formatLocal(dateMs)}</code>
-              </div>
-              <div className="date-line">
-                <span>ISO 8601</span>
-                <code>{formatIso(dateMs)}</code>
-              </div>
-              <div className="date-line">
-                <span>Unix</span>
-                <code>{Math.floor(dateMs / 1000)}</code>
-              </div>
-            </div>
-          </div>
-        )}
-      </section>
+            )}
 
-      {detectedMs !== null && (
-        <section id="auto-detect" className="card" role="status" aria-live="polite">
-          <div className="date-hero small">
-            <div className="date-hero-top">
-              <span className="status-dot"></span>
-              Detected • {useUtc ? 'UTC' : 'Local'}
-            </div>
-            <div className="date-hero-main" id="detected-date">{formatFull(detectedMs, useUtc)}</div>
-            <div className="date-hero-sub">{relativeTimeFromNow(detectedMs)}</div>
-          </div>
-          <div className="date-lines">
-            <div className="date-line">
-              <span>UTC</span>
-              <code>{formatUtc(detectedMs)}</code>
-            </div>
-            <div className="date-line">
-              <span>Local</span>
-              <code>{formatLocal(detectedMs)}</code>
-            </div>
-            <div className="date-line">
-              <span>ISO 8601</span>
-              <code>{formatIso(detectedMs)}</code>
-            </div>
-          </div>
-        </section>
-      )}
+            {detectedMs && (
+              <div className="flex items-center justify-between rounded-md border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <span className="material-icons text-emerald-500">bolt</span>
+                  Auto-detected date available
+                </div>
+                <Badge variant="secondary">Live</Badge>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {dateMs !== null && renderDateCard({ title: "Manual", timestamp: dateMs })}
+
+        {detectedMs !== null &&
+          renderDateCard({
+            title: "Detected",
+            timestamp: detectedMs,
+            badge: (
+              <Badge className="bg-emerald-500 text-emerald-50">
+                <span className="material-icons text-xs">bolt</span>
+                Live
+              </Badge>
+            ),
+          })}
+      </div>
+    </main>
+  );
+}
+
+function InfoRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-start justify-between gap-3 rounded-md border border-border/60 bg-muted/30 px-3 py-2">
+      <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        {label}
+      </span>
+      <code className="flex-1 text-right text-xs text-foreground">{value}</code>
     </div>
   );
 }
