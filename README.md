@@ -1,5 +1,7 @@
 # Date Sniffer
 
+![Date Sniffer feature image](https://i.postimg.cc/rmMj3wFX/date-sniffer.png)
+
 A Chrome extension to extract post dates from TikTok videos and LinkedIn posts with just one click.
 
 ## Features
